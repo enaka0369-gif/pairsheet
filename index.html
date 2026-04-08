@@ -1052,6 +1052,24 @@
     </div>
 
     <script>
+const txtStyleBar = document.getElementById('txtStyleBar');
+
+txtStyleBar.addEventListener('mousedown', (e) => {
+  e.stopPropagation();
+});
+
+document.addEventListener('mousedown', (e) => {
+  const bar = document.getElementById('txtStyleBar');
+
+  if (!selectedBox) return;
+  if (selectedBox.contains(e.target)) return;
+  if (bar.contains(e.target)) return;
+
+  selectedBox.classList.remove('selected');
+  selectedBox = null;
+  bar.style.display = 'none';
+});
+      
       const STATS = [
         { l: "STR", v: 14 },
         { l: "CON", v: 17 },
