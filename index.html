@@ -536,20 +536,6 @@
 }
       /* ===== FLOATING TEXTBOXES ===== */
       .float-txt {
-        position: absolute;
-        min-width: 80px;
-        min-height: 28px;
-        background: rgba(0, 0, 0, 0.55);
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        border-radius: 4px;
-        cursor: move;
-        z-index: 10;
-        user-select: none;
-      }
-      .float-txt.selected {
-        border-color: rgba(192, 132, 252, 0.8);
-      }
-      .float-txt {
   position: absolute;
   min-width: 80px;
   min-height: 28px;
@@ -562,7 +548,7 @@
 }
 
 .float-txt.selected {
-  border-color: rgba(192, 132, 252, 0.8);
+  border: 1px dashed rgba(192, 132, 252, 0.8);
 }
 
 .free-text {
