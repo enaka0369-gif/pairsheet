@@ -1315,61 +1315,60 @@ function loadPortrait(inp, imgId, boxId) {
       }
 
       async function exportPNG() {
-        const ov = document.getElementById("exportOverlay");
-        ov.classList.add("show");
+  const ov = document.getElementById("exportOverlay");
+  ov.classList.add("show");
 
-        await document.fonts.ready;
+  await document.fonts.ready;
 
-        document.getElementById("colorPickRow").style.display = "none";
-        document.getElementById("txtStyleBar").style.display = "none";
+  document.getElementById("colorPickRow").style.display = "none";
 
-        if (selectedBox) selectedBox.classList.remove("selected");
+  if (selectedBox) selectedBox.classList.remove("selected");
 
-        document
-          .querySelectorAll(".float-txt-del")
-          .forEach((b) => (b.style.opacity = "0"));
-        document
-          .querySelectorAll(".float-txt-resize")
-          .forEach((b) => (b.style.opacity = "0"));
-        document
-          .querySelectorAll("input[type=file]")
-          .forEach((i) => (i.style.display = "none"));
+  document
+    .querySelectorAll(".float-txt-del")
+    .forEach((b) => (b.style.opacity = "0"));
+  document
+    .querySelectorAll(".float-txt-resize")
+    .forEach((b) => (b.style.opacity = "0"));
+  document
+    .querySelectorAll("input[type=file]")
+    .forEach((i) => (i.style.display = "none"));
 
-        const replaced = replaceInputsForExport();
+  const replaced = replaceInputsForExport();
 
-        await new Promise((r) => setTimeout(r, 150));
+  await new Promise((r) => setTimeout(r, 150));
 
-        try {
-          const c = await html2canvas(document.getElementById("sheet"), {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: "#d4d0d8",
-            logging: false,
-          });
+  try {
+    const c = await html2canvas(document.getElementById("sheet"), {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: "#d4d0d8",
+      logging: false,
+    });
 
-          const a = document.createElement("a");
-          a.download = "pair_sheet.png";
-          a.href = c.toDataURL("image/png");
-          a.click();
-        } catch (e) {
-          alert("書き出しに失敗しました: " + e.message);
-        }
+    const a = document.createElement("a");
+    a.download = "pair_sheet.png";
+    a.href = c.toDataURL("image/png");
+    a.click();
+  } catch (e) {
+    alert("書き出しに失敗しました: " + e.message);
+  }
 
-        restoreInputsAfterExport(replaced);
+  restoreInputsAfterExport(replaced);
 
-        document.getElementById("colorPickRow").style.display = "flex";
-        document
-          .querySelectorAll(".float-txt-del")
-          .forEach((b) => (b.style.opacity = ""));
-        document
-          .querySelectorAll(".float-txt-resize")
-          .forEach((b) => (b.style.opacity = ""));
-        document
-          .querySelectorAll("input[type=file]")
-          .forEach((i) => (i.style.display = ""));
-        ov.classList.remove("show");
-      }
+  document.getElementById("colorPickRow").style.display = "flex";
+  document
+    .querySelectorAll(".float-txt-del")
+    .forEach((b) => (b.style.opacity = ""));
+  document
+    .querySelectorAll(".float-txt-resize")
+    .forEach((b) => (b.style.opacity = ""));
+  document
+    .querySelectorAll("input[type=file]")
+    .forEach((i) => (i.style.display = ""));
+  ov.classList.remove("show");
+}
       /* ===== FLOATING TEXTBOXES ===== */
       let selectedBox = null;
 
@@ -1550,7 +1549,6 @@ function loadPortrait(inp, imgId, boxId) {
         ) {
           selectedBox.classList.remove("selected");
           selectedBox = null;
-          document.getElementById("txtStyleBar").style.display = "none";
         }
       });
 
