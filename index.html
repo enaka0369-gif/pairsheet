@@ -1068,12 +1068,6 @@
     </div>
 
     <script>
-const txtStyleBar = document.getElementById('txtStyleBar');
-
-txtStyleBar.addEventListener('mousedown', (e) => {
-  e.stopPropagation();
-});
-
 document.addEventListener('mousedown', e => {
   const control = document.querySelector('.control-panel');
 
@@ -1373,15 +1367,15 @@ function loadPortrait(inp, imgId, boxId) {
       }
 
       function deleteBox(box) {
-        if (selectedBox === box) {
-          selectedBox = null;
-          document.getElementById("txtStyleBar").style.display = "none";
-        }
-        box.remove();
-        const layer = document.getElementById("floatLayer");
-        if (!layer.querySelector(".float-txt"))
-          layer.style.pointerEvents = "none";
-      }
+  if (selectedBox === box) {
+    selectedBox = null;
+  }
+  box.remove();
+  const layer = document.getElementById("floatLayer");
+  if (!layer.querySelector(".float-txt")) {
+    layer.style.pointerEvents = "none";
+  }
+}
 
       function selectBox(box) {
   if(selectedBox) selectedBox.classList.remove('selected');
