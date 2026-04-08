@@ -190,21 +190,23 @@
         gap: 8px;
         align-items: flex-start;
       }
-      .portrait-box {
+.portrait-box {
   width: 100px;
   height: 100px;
   background: #555;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 4px;
+  flex-shrink: 0;
+  position: relative;
   overflow: hidden;
+  cursor: pointer;
+
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
 }
 
 .portrait-box img {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
+  display: none;
 }
       .portrait-box .upload-hint {
         position: absolute;
@@ -1149,14 +1151,22 @@
         }
       }
 
-      function loadPortrait(inp, imgId, boxId) {
-        if (!inp.files[0]) return;
-        const img = document.getElementById(imgId),
-          box = document.getElementById(boxId);
-        img.src = URL.createObjectURL(inp.files[0]);
-        img.style.display = "block";
-        box.querySelector(".upload-hint").style.display = "none";
-      }
+function loadPortrait(inp, imgId, boxId) {
+  if (!inp.files[0]) return;
+
+  const box = document.getElementById(boxId);
+  const url = URL.createObjectURL(inp.files[0]);
+
+  box.style.backgroundImage = `url('${url}')`;
+  box.style.backgroundRepeat = 'no-repeat';
+  box.style.backgroundPosition = 'center';
+  box.style.backgroundSize = 'contain';
+
+  box.querySelector('.upload-hint').style.display = 'none';
+
+  const img = document.getElementById(imgId);
+  img.src = url;
+}
 
       function loadCenter(inp) {
         if (!inp.files[0]) return;
