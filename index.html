@@ -522,20 +522,21 @@
         border-color: rgba(192, 132, 252, 0.8);
       }
       .float-txt textarea {
-        width: 100%;
-        height: 100%;
-        background: transparent;
-        border: none;
-        outline: none;
-        resize: none;
-        color: white;
-        font-size: 13px;
-        font-family: "Noto Sans JP", sans-serif;
-        padding: 5px 24px 5px 7px;
-        line-height: 1.5;
-        cursor: text;
-        min-height: 28px;
-      }
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  color: white;
+  font-size: 13px;
+  font-family: 'Noto Sans JP', sans-serif;
+  padding: 5px 24px 5px 7px;
+  line-height: 1.5;
+  cursor: text;
+  min-height: 28px;
+  white-space: pre-wrap;
+}
       .float-txt-del {
         position: absolute;
         top: 2px;
@@ -900,6 +901,10 @@
               <select id="txtWeight" onchange="applyTxtStyle()">
                 <option value="400">標準</option>
                 <option value="700">太字</option>
+              </select>
+              <select id="txtMode" onchange="applyTxtStyle()">
+              <option value="horizontal">横書き</option>
+             <option value="vertical">縦書き</option>
               </select>
             </div>
             <!-- textbox container -->
@@ -1346,38 +1351,54 @@ function loadPortrait(inp, imgId, boxId) {
       }
 
       function selectBox(box) {
-        if (selectedBox) selectedBox.classList.remove("selected");
-        selectedBox = box;
-        box.classList.add("selected");
-        const bar = document.getElementById("txtStyleBar");
-        bar.style.display = "flex";
-        // sync controls to current box style
-        const ta = box.querySelector("textarea");
-        document.getElementById("txtColor").value = rgbToHex(
-          ta.style.color || "#ffffff"
-        );
-        const sz = parseInt(ta.style.fontSize) || 13;
-        document.getElementById("txtSize").value = sz;
-        document.getElementById("txtSizeVal").textContent = sz;
-        document.getElementById("txtAlign").value =
-          ta.style.textAlign || "left";
-        document.getElementById("txtWeight").value =
-          ta.style.fontWeight || "400";
-      }
+  if(selectedBox) selectedBox.classList.remove('selected');
+  selectedBox = box;
+  box.classList.add('selected');
+
+  const bar = document.getElementById('txtStyleBar');
+  bar.style.display = 'flex';
+
+  const ta = box.querySelector('textarea');
+  document.getElementById('txtColor').value = rgbToHex(ta.style.color || '#ffffff');
+
+  const sz = parseInt(ta.style.fontSize) || 13;
+  document.getElementById('txtSize').value = sz;
+  document.getElementById('txtSizeVal').textContent = sz;
+
+  document.getElementById('txtAlign').value = ta.style.textAlign || 'left';
+  document.getElementById('txtWeight').value = ta.style.fontWeight || '400';
+
+  const mode = ta.style.writingMode === 'vertical-rl' ? 'vertical' : 'horizontal';
+  document.getElementById('txtMode').value = mode;
+}
 
       function applyTxtStyle() {
-        if (!selectedBox) return;
-        const ta = selectedBox.querySelector("textarea");
-        const color = document.getElementById("txtColor").value;
-        const size = document.getElementById("txtSize").value;
-        const align = document.getElementById("txtAlign").value;
-        const weight = document.getElementById("txtWeight").value;
-        ta.style.color = color;
-        ta.style.fontSize = size + "px";
-        ta.style.textAlign = align;
-        ta.style.fontWeight = weight;
-        document.getElementById("txtSizeVal").textContent = size;
-      }
+  if(!selectedBox) return;
+
+  const ta = selectedBox.querySelector('textarea');
+  const color = document.getElementById('txtColor').value;
+  const size = document.getElementById('txtSize').value;
+  const align = document.getElementById('txtAlign').value;
+  const weight = document.getElementById('txtWeight').value;
+  const mode = document.getElementById('txtMode').value;
+
+  ta.style.color = color;
+  ta.style.fontSize = size + 'px';
+  ta.style.textAlign = align;
+  ta.style.fontWeight = weight;
+
+  if (mode === 'vertical') {
+    ta.style.writingMode = 'vertical-rl';
+    ta.style.textOrientation = 'upright';
+    ta.style.whiteSpace = 'pre-wrap';
+  } else {
+    ta.style.writingMode = 'horizontal-tb';
+    ta.style.textOrientation = 'mixed';
+    ta.style.whiteSpace = 'pre-wrap';
+  }
+
+  document.getElementById('txtSizeVal').textContent = size;
+}
 
       function rgbToHex(str) {
         if (str.startsWith("#")) return str;
