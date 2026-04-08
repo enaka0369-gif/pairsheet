@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ペアキャラクターシート</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Zen+Antique&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Noto Sans JP", sans-serif;
+        background: #1a1a2e;
+        color: #eee;
+        min-height: 100vh;
+      }
+
+      .control-panel {
+        background: #16213e;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        border-bottom: 1px solid #3a3a5c;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .control-panel h1 {
+        font-family: "Zen Antique", serif;
+        font-size: 17px;
+        color: #c084fc;
+        margin-right: 4px;
+      }
+      .btn {
+        padding: 7px 16px;
+        border: none;
+        border-radius: 6px;
+        font-family: "Noto Sans JP", sans-serif;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 700;
+      }
+      .btn-export {
+        background: #7c3aed;
+        color: white;
+      }
+      .btn-export:hover {
+        background: #6d28d9;
+        transform: translateY(-1px);
+      }
+      .btn-secondary {
+        background: #2d2d4e;
+        color: #c084fc;
+        border: 1px solid #4a4a7a;
+      }
+      .btn-secondary:hover {
+        background: #3a3a5e;
+      }
+      .toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #1e2a4a;
+        padding: 5px 10px;
+        border-radius: 6px;
+        border: 1px solid #3a3a5c;
+      }
+      .toolbar-group label {
+        font-size: 11px;
+        color: #aaa;
+        white-space: nowrap;
+      }
+      .tc {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: border-color 0.2s;
+        flex-shrink: 0;
+      }
+      .tc.active {
+        border-color: white;
+      }
+      .tc-inp {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        padding: 0;
+      }
+      .sep {
+        color: #3a3a5c;
+        font-size: 18px;
+      }
+
+      .canvas-wrap {
+        padding: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: calc(100vh - 58px);
+      }
+
+      #sheet {
+        background: #d4d0d8;
+        width: 1000px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .sheet-header {
+        background: #6d6d6d;
+        display: grid;
+        grid-template-columns: 200px 1fr 200px;
+        align-items: center;
+        padding: 10px 16px;
+        min-height: 64px;
+      }
+      .header-name {
+        display: flex;
+        flex-direction: column;
+      }
+      .header-name .kanji {
+        font-family: "Zen Antique", serif;
+        font-size: 20px;
+        color: white;
+        font-weight: 700;
+      }
+      .header-name.right {
+        text-align: right;
+      }
+      .pair-name-display input {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        font-family: "Zen Antique", serif;
+        font-size: 24px;
+        text-align: center;
+        width: 100%;
+        outline: none;
+        letter-spacing: 3px;
+      }
+      .pair-name-display input:focus {
+        border-bottom-color: #c084fc;
+      }
+      .header-name-input {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        font-family: "Zen Antique", serif;
+        font-size: 14px;
+        outline: none;
+        width: 100%;
+      }
+      .header-name-input:focus {
+        border-bottom-color: #c084fc;
+      }
+
+      .sheet-body {
+        display: grid;
+        grid-template-columns: 220px 1fr 220px;
+        min-height: 700px;
+      }
+
+      .char-panel {
+        background: #cdcdcd;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .portrait-row {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .portrait-box {
+        width: 100px;
+        height: 100px;
+        background: #7c3aed;
+        border-radius: 4px;
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+      }
+      .portrait-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .portrait-box .upload-hint {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.7);
+        text-align: center;
+        line-height: 1.4;
+      }
+      .portrait-box input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+      .portrait-color-btn {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        padding: 0;
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 3;
+      }
+      .portrait-box:hover .portrait-color-btn {
+        opacity: 1;
+      }
+
+      .tags-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .tag-wrap {
+        position: relative;
+        width: 100%;
+      }
+      .tag-input {
+        background: #1a1a1a;
+        color: white;
+        font-size: 10px;
+        padding: 3px 20px 3px 6px;
+        border-radius: 3px;
+        border: none;
+        outline: none;
+        width: 100%;
+        font-family: "Noto Sans JP", sans-serif;
+        text-align: center;
+      }
+      .tag-color-btn {
+        position: absolute;
+        right: 3px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        cursor: pointer;
+        padding: 0;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .tag-wrap:hover .tag-color-btn {
+        opacity: 1;
+      }
+
+      .icon-row {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+      }
+      .icon-box-input {
+        width: 36px;
+        height: 28px;
+        background: #1a1a1a;
+        border-radius: 4px;
+        border: none;
+        outline: none;
+        color: white;
+        font-size: 9px;
+        font-family: "Noto Sans JP", sans-serif;
+        text-align: center;
+        flex-shrink: 0;
+        padding: 2px;
+      }
+      .icon-box-input:focus {
+        outline: 1px solid #7c3aed;
+      }
+      .age-group {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        margin-left: 2px;
+      }
+      .age-label {
+        font-size: 10px;
+        color: #555;
+        white-space: nowrap;
+      }
+      .age-input {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #888;
+        font-size: 11px;
+        color: #333;
+        outline: none;
+        width: 38px;
+        text-align: center;
+        font-family: "Noto Sans JP", sans-serif;
+      }
+      .age-input:focus {
+        border-bottom-color: #7c3aed;
+      }
+
+      .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .field-label {
+        font-size: 10px;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .field-input {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #888;
+        font-size: 12px;
+        color: #222;
+        outline: none;
+        width: 100%;
+        padding: 2px 0;
+        font-family: "Noto Sans JP", sans-serif;
+      }
+      .field-input:focus {
+        border-bottom-color: #7c3aed;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .stats-section {
+        margin-top: 4px;
+      }
+      .stat-row {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 4px;
+      }
+      .stat-label {
+        font-size: 10px;
+        color: #444;
+        width: 28px;
+        flex-shrink: 0;
+        text-transform: uppercase;
+      }
+      .stat-bar-wrap {
+        flex: 1;
+        height: 8px;
+        background: #aaa;
+        border-radius: 2px;
+        overflow: hidden;
+        cursor: pointer;
+      }
+      .stat-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.15s;
+        background: #7c3aed;
+      }
+      .stat-input {
+        width: 28px;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #888;
+        font-size: 10px;
+        text-align: center;
+        color: #333;
+        outline: none;
+        font-family: "Noto Sans JP", sans-serif;
+      }
+
+      .section-title {
+        font-family: "Zen Antique", serif;
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 4px;
+      }
+      .trait-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .trait-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .trait-bullet {
+        font-size: 10px;
+        color: #555;
+        flex-shrink: 0;
+      }
+      .trait-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #999;
+        font-size: 11px;
+        color: #333;
+        outline: none;
+        font-family: "Noto Sans JP", sans-serif;
+        padding: 2px 0;
+      }
+      .trait-input:focus {
+        border-bottom-color: #7c3aed;
+      }
+
+      .center-panel {
+        background: #2d0a4e;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        min-height: 600px;
+        cursor: pointer;
+      }
+      .center-label {
+        color: rgba(255, 255, 255, 0.15);
+        font-family: "Zen Antique", serif;
+        font-size: 22px;
+        letter-spacing: 4px;
+        text-align: center;
+        pointer-events: none;
+        user-select: none;
+      }
+      .center-panel img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .center-panel input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 2;
+      }
+      .color-pick-row {
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+        z-index: 3;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 5px 10px;
+        border-radius: 20px;
+      }
+      .color-swatch {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+      }
+      .color-swatch.active {
+        border-color: white;
+      }
+      .bg-custom {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        cursor: pointer;
+        padding: 0;
+      }
+
+      /* ===== FLOATING TEXTBOXES ===== */
+      .float-txt {
+        position: absolute;
+        min-width: 80px;
+        min-height: 28px;
+        background: rgba(0, 0, 0, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 4px;
+        cursor: move;
+        z-index: 10;
+        user-select: none;
+      }
+      .float-txt.selected {
+        border-color: rgba(192, 132, 252, 0.8);
+      }
+      .float-txt textarea {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: none;
+        outline: none;
+        resize: none;
+        color: white;
+        font-size: 13px;
+        font-family: "Noto Sans JP", sans-serif;
+        padding: 5px 24px 5px 7px;
+        line-height: 1.5;
+        cursor: text;
+        min-height: 28px;
+      }
+      .float-txt-del {
+        position: absolute;
+        top: 2px;
+        right: 3px;
+        background: rgba(255, 80, 80, 0.7);
+        color: white;
+        border: none;
+        border-radius: 3px;
+        font-size: 10px;
+        cursor: pointer;
+        padding: 1px 4px;
+        opacity: 0;
+        transition: opacity 0.15s;
+        line-height: 1.4;
+        z-index: 2;
+      }
+      .float-txt:hover .float-txt-del,
+      .float-txt.selected .float-txt-del {
+        opacity: 1;
+      }
+      .float-txt-resize {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 10px;
+        height: 10px;
+        cursor: se-resize;
+        opacity: 0.4;
+      }
+      /* text style controls bar */
+      .txt-style-bar {
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 5px;
+        z-index: 4;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 4px 8px;
+        border-radius: 16px;
+        align-items: center;
+      }
+      .txt-style-bar label {
+        font-size: 10px;
+        color: #aaa;
+        white-space: nowrap;
+      }
+      .txt-style-bar input[type="color"] {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        padding: 0;
+      }
+      .txt-style-bar input[type="range"] {
+        width: 60px;
+        accent-color: #c084fc;
+      }
+      .txt-style-bar select {
+        background: #222;
+        color: white;
+        border: 1px solid #555;
+        border-radius: 4px;
+        font-size: 10px;
+        padding: 1px 2px;
+      }
+      .txt-style-bar button {
+        background: rgba(124, 58, 237, 0.7);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 10px;
+        padding: 3px 8px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .txt-style-bar button:hover {
+        background: rgba(124, 58, 237, 1);
+      }
+      .export-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .export-overlay.show {
+        display: flex;
+      }
+      .export-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid rgba(192, 132, 252, 0.3);
+        border-top-color: #c084fc;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .export-overlay p {
+        color: #c084fc;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="control-panel">
+      <h1>⚙ ペアシートエディタ</h1>
+      <button class="btn btn-export" onclick="exportPNG()">
+        📥 PNG書き出し
+      </button>
+      <button class="btn btn-secondary" onclick="resetSheet()">
+        🔄 リセット
+      </button>
+      <button class="btn btn-secondary" onclick="addTextBox()">
+        ✏️ テキスト追加
+      </button>
+      <span class="sep">|</span>
+
+      <div class="toolbar-group" id="statGroup">
+        <label>ステータス色</label>
+        <div
+          class="tc active"
+          style="background: #7c3aed"
+          onclick="setStatColor('#7c3aed',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #e03a6a"
+          onclick="setStatColor('#e03a6a',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #2196f3"
+          onclick="setStatColor('#2196f3',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #26a06b"
+          onclick="setStatColor('#26a06b',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #f59e0b"
+          onclick="setStatColor('#f59e0b',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #e53935"
+          onclick="setStatColor('#e53935',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #888"
+          onclick="setStatColor('#888',this)"
+        ></div>
+        <input
+          type="color"
+          class="tc-inp"
+          value="#7c3aed"
+          onchange="setStatColor(this.value,null)"
+        />
+      </div>
+
+      <div class="toolbar-group" id="tagGroup">
+        <label>タグ色</label>
+        <div
+          class="tc active"
+          style="background: #1a1a1a"
+          onclick="setTagColor('#1a1a1a','#fff',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #7c3aed"
+          onclick="setTagColor('#7c3aed','#fff',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #e03a6a"
+          onclick="setTagColor('#e03a6a','#fff',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #2196f3"
+          onclick="setTagColor('#2196f3','#fff',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #26a06b"
+          onclick="setTagColor('#26a06b','#fff',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #f0e8ff"
+          onclick="setTagColor('#f0e8ff','#333',this)"
+        ></div>
+        <div
+          class="tc"
+          style="background: #3a2a4a; border: 1px solid #666"
+          onclick="setTagColor('#3a2a4a','#ddd',this)"
+        ></div>
+        <input
+          type="color"
+          class="tc-inp"
+          value="#1a1a1a"
+          onchange="setTagColor(this.value,'#fff',null)"
+        />
+      </div>
+    </div>
+
+    <div class="canvas-wrap">
+      <div id="sheet">
+        <div class="sheet-header">
+          <div class="header-name">
+            <input
+              id="headerName1"
+              class="header-name-input"
+              type="text"
+              placeholder="CHARACTER NAME"
+              value="CHARACTER NAME"
+              oninput="syncName(1,this.value)"
+            />
+          </div>
+          <div class="pair-name-display" style="text-align: center">
+            <input type="text" placeholder="PAIR NAME" value="PAIR NAME" />
+          </div>
+          <div class="header-name right">
+            <input
+              id="headerName2"
+              class="header-name-input"
+              type="text"
+              placeholder="CHARACTER NAME"
+              value="CHARACTER NAME"
+              style="text-align: right"
+              oninput="syncName(2,this.value)"
+            />
+          </div>
+        </div>
+
+        <div class="sheet-body">
+          <!-- LEFT -->
+          <div class="char-panel">
+            <div class="portrait-row">
+              <div class="portrait-box" id="p1box">
+                <div class="upload-hint">クリックして<br />画像追加</div>
+                <img id="p1img" src="" alt="" style="display: none" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onchange="loadPortrait(this,'p1img','p1box')"
+                />
+                <input
+                  type="color"
+                  class="portrait-color-btn"
+                  value="#7c3aed"
+                  title="背景色"
+                  onchange="setPortraitColor('p1box',this.value)"
+                  onclick="event.stopPropagation()"
+                />
+              </div>
+              <div class="tags-col" id="tags1">
+                <div class="tag-wrap">
+                  <input class="tag-input" value="HAIR" /><input
+                    type="color"
+                    class="tag-color-btn"
+                    value="#1a1a1a"
+                    oninput="applyTagColor(this)"
+                  />
+                </div>
+                <div class="tag-wrap">
+                  <input class="tag-input" value="EYE" /><input
+                    type="color"
+                    class="tag-color-btn"
+                    value="#1a1a1a"
+                    oninput="applyTagColor(this)"
+                  />
+                </div>
+                <div class="tag-wrap">
+                  <input class="tag-input" value="ETC" /><input
+                    type="color"
+                    class="tag-color-btn"
+                    value="#1a1a1a"
+                    oninput="applyTagColor(this)"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field-group">
+                <div class="field-label">NAME</div>
+                <input
+                  id="charName1"
+                  class="field-input"
+                  placeholder="名前"
+                  oninput="syncName(1,this.value)"
+                />
+              </div>
+              <div class="field-group">
+                <div class="field-label">AGE</div>
+                <input class="field-input" type="text" placeholder="--" />
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field-group">
+                <div class="field-label">JOB</div>
+                <input class="field-input" placeholder="職業" />
+              </div>
+              <div class="field-group">
+                <div class="field-label">SEX</div>
+                <input class="field-input" placeholder="性別" />
+              </div>
+            </div>
+            <div class="stats-section" id="stats1"></div>
+            <div>
+              <div class="section-title">Physical appearance</div>
+              <div class="trait-list" id="traits1a"></div>
+            </div>
+            <div>
+              <div class="section-title">Other features</div>
+              <div class="trait-list" id="traits1b"></div>
+            </div>
+          </div>
+
+          <!-- CENTER -->
+          <div class="center-panel" id="centerPanel">
+            <div class="center-label" id="centerLabel">
+              クリックして<br />画像を追加
+            </div>
+            <!-- floating textbox style bar (shown when a box is selected) -->
+            <div class="txt-style-bar" id="txtStyleBar" style="display: none">
+              <label>色</label>
+              <input
+                type="color"
+                id="txtColor"
+                value="#ffffff"
+                oninput="applyTxtStyle()"
+              />
+              <label>サイズ</label>
+              <input
+                type="range"
+                id="txtSize"
+                min="8"
+                max="48"
+                value="13"
+                oninput="applyTxtStyle()"
+              />
+              <label id="txtSizeVal">13</label>
+              <select id="txtAlign" onchange="applyTxtStyle()">
+                <option value="left">左</option>
+                <option value="center">中央</option>
+                <option value="right">右</option>
+              </select>
+              <select id="txtWeight" onchange="applyTxtStyle()">
+                <option value="400">標準</option>
+                <option value="700">太字</option>
+              </select>
+            </div>
+            <!-- textbox container -->
+            <div
+              id="floatLayer"
+              style="
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                z-index: 5;
+              "
+            ></div>
+            <img id="centerImg" src="" alt="" style="display: none" />
+            <input type="file" accept="image/*" onchange="loadCenter(this)" />
+            <div class="color-pick-row" id="colorPickRow">
+              <div
+                class="color-swatch active"
+                style="background: #2d0a4e"
+                onclick="setBgColor('#2d0a4e',this)"
+              ></div>
+              <div
+                class="color-swatch"
+                style="background: #0a2d0e"
+                onclick="setBgColor('#0a2d0e',this)"
+              ></div>
+              <div
+                class="color-swatch"
+                style="background: #0a1a2d"
+                onclick="setBgColor('#0a1a2d',this)"
+              ></div>
+              <div
+                class="color-swatch"
+                style="background: #2d0a0a"
+                onclick="setBgColor('#2d0a0a',this)"
+              ></div>
+              <div
+                class="color-swatch"
+                style="background: #1a1a1a"
+                onclick="setBgColor('#1a1a1a',this)"
+              ></div>
+              <div
+                class="color-swatch"
+                style="background: #2d2a0a"
+                onclick="setBgColor('#2d2a0a',this)"
+              ></div>
+              <input
+                type="color"
+                class="bg-custom"
+                title="カスタム"
+                onchange="setBgColor(this.value,null)"
+              />
+            </div>
+          </div>
+
+          <!-- RIGHT -->
+          <div class="char-panel">
+            <div class="portrait-row" style="flex-direction: row-reverse">
+              <div class="portrait-box" id="p2box">
+                <div class="upload-hint">クリックして<br />画像追加</div>
+                <img id="p2img" src="" alt="" style="display: none" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onchange="loadPortrait(this,'p2img','p2box')"
+                />
+                <input
+                  type="color"
+                  class="portrait-color-btn"
+                  value="#7c3aed"
+                  title="背景色"
+                  onchange="setPortraitColor('p2box',this.value)"
+                  onclick="event.stopPropagation()"
+                />
+              </div>
+              <div class="tags-col" id="tags2">
+                <div class="tag-wrap">
+                  <input class="tag-input" value="HAIR" /><input
+                    type="color"
+                    class="tag-color-btn"
+                    value="#1a1a1a"
+                    oninput="applyTagColor(this)"
+                  />
+                </div>
+                <div class="tag-wrap">
+                  <input class="tag-input" value="EYE" /><input
+                    type="color"
+                    class="tag-color-btn"
+                    value="#1a1a1a"
+                    oninput="applyTagColor(this)"
+                  />
+                </div>
+                <div class="tag-wrap">
+                  <input class="tag-input" value="ETC" /><input
+                    type="color"
+                    class="tag-color-btn"
+                    value="#1a1a1a"
+                    oninput="applyTagColor(this)"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field-group">
+                <div class="field-label">AGE</div>
+                <input class="field-input" type="text" placeholder="--" />
+              </div>
+              <div class="field-group" style="text-align: right">
+                <div class="field-label">NAME</div>
+                <input
+                  id="charName2"
+                  class="field-input"
+                  placeholder="名前"
+                  style="text-align: right"
+                  oninput="syncName(2,this.value)"
+                />
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field-group">
+                <div class="field-label">JOB</div>
+                <input class="field-input" placeholder="職業" />
+              </div>
+              <div class="field-group">
+                <div class="field-label">SEX</div>
+                <input class="field-input" placeholder="性別" />
+              </div>
+            </div>
+            <div class="stats-section" id="stats2"></div>
+            <div>
+              <div class="section-title">Physical appearance</div>
+              <div class="trait-list" id="traits2a"></div>
+            </div>
+            <div>
+              <div class="section-title">Other features</div>
+              <div class="trait-list" id="traits2b"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="export-overlay" id="exportOverlay">
+      <div class="export-spinner"></div>
+      <p>書き出し中...</p>
+    </div>
+
+    <script>
+      const STATS = [
+        { l: "STR", v: 14 },
+        { l: "CON", v: 17 },
+        { l: "POW", v: 13 },
+        { l: "DEX", v: 6 },
+        { l: "APP", v: 18 },
+        { l: "SIZ", v: 16 },
+        { l: "INT", v: 13 },
+        { l: "EDU", v: 17 },
+      ];
+      const MAX = 24;
+      let statColor = "#7c3aed";
+
+      function buildStats(id) {
+        const el = document.getElementById(id);
+        el.innerHTML = "";
+        STATS.forEach((s) => {
+          const d = document.createElement("div");
+          d.className = "stat-row";
+          d.innerHTML = `<span class="stat-label">${s.l}</span>
+      <div class="stat-bar-wrap" onclick="clickBar(event,this)">
+        <div class="stat-bar-fill" style="width:${
+          (s.v / MAX) * 100
+        }%;background:${statColor}"></div>
+      </div>
+      <input class="stat-input" type="number" min="1" max="${MAX}" value="${
+            s.v
+          }" oninput="syncBar(this)">`;
+          el.appendChild(d);
+        });
+      }
+
+      function syncBar(inp) {
+        const v = Math.min(MAX, Math.max(1, parseInt(inp.value) || 1));
+        inp.previousElementSibling.querySelector(".stat-bar-fill").style.width =
+          (v / MAX) * 100 + "%";
+      }
+
+      function clickBar(e, wrap) {
+        const r = wrap.getBoundingClientRect();
+        const v = Math.max(
+          1,
+          Math.min(MAX, Math.round(((e.clientX - r.left) / r.width) * MAX))
+        );
+        wrap.querySelector(".stat-bar-fill").style.width =
+          (v / MAX) * 100 + "%";
+        wrap.nextElementSibling.value = v;
+      }
+
+      function setStatColor(c, sw) {
+        statColor = c;
+        document
+          .querySelectorAll(".stat-bar-fill")
+          .forEach((b) => (b.style.background = c));
+        if (sw) {
+          document
+            .querySelectorAll("#statGroup .tc")
+            .forEach((s) => s.classList.remove("active"));
+          sw.classList.add("active");
+        }
+      }
+
+      function setTagColor(bg, text, sw) {
+        document.querySelectorAll(".tag-input").forEach((t) => {
+          t.style.background = bg;
+          t.style.color = text;
+        });
+        document.querySelectorAll(".tag-color-btn").forEach((b) => {
+          b.value = bg;
+          b.style.background = bg;
+        });
+        if (sw) {
+          document
+            .querySelectorAll("#tagGroup .tc")
+            .forEach((s) => s.classList.remove("active"));
+          sw.classList.add("active");
+        }
+      }
+
+      function applyTagColor(picker) {
+        const bg = picker.value;
+        const inp = picker.previousElementSibling;
+        inp.style.background = bg;
+        // auto text color: light bg -> dark text, dark bg -> white
+        const r = parseInt(bg.slice(1, 3), 16),
+          g = parseInt(bg.slice(3, 5), 16),
+          b = parseInt(bg.slice(5, 7), 16);
+        inp.style.color =
+          r * 0.299 + g * 0.587 + b * 0.114 > 128 ? "#222" : "#fff";
+        picker.style.background = bg;
+      }
+
+      function buildTraits(id, n) {
+        const el = document.getElementById(id);
+        el.innerHTML = "";
+        for (let i = 0; i < n; i++) {
+          const d = document.createElement("div");
+          d.className = "trait-item";
+          d.innerHTML =
+            '<span class="trait-bullet">・</span><input class="trait-input" placeholder="特徴を入力...">';
+          el.appendChild(d);
+        }
+      }
+
+      function loadPortrait(inp, imgId, boxId) {
+        if (!inp.files[0]) return;
+        const img = document.getElementById(imgId),
+          box = document.getElementById(boxId);
+        img.src = URL.createObjectURL(inp.files[0]);
+        img.style.display = "block";
+        box.querySelector(".upload-hint").style.display = "none";
+      }
+
+      function loadCenter(inp) {
+        if (!inp.files[0]) return;
+        const img = document.getElementById("centerImg");
+        img.src = URL.createObjectURL(inp.files[0]);
+        img.style.display = "block";
+        document.getElementById("centerLabel").style.display = "none";
+      }
+
+      function setBgColor(c, sw) {
+        document.getElementById("centerPanel").style.background = c;
+        if (sw) {
+          document
+            .querySelectorAll(".color-swatch")
+            .forEach((s) => s.classList.remove("active"));
+          sw.classList.add("active");
+        }
+      }
+
+      function resetSheet() {
+        if (confirm("リセットしますか？")) location.reload();
+      }
+
+      function replaceInputsForExport() {
+        const targets = document.querySelectorAll(
+          ".tag-input, .field-input, .trait-input, .stat-input, .header-name-input, .pair-name-display input"
+        );
+
+        const replaced = [];
+
+        targets.forEach((input) => {
+          const span = document.createElement("span");
+          const style = getComputedStyle(input);
+
+          span.textContent = input.value || input.placeholder || "";
+          span.style.display = "inline-block";
+          span.style.width = style.width;
+          span.style.minHeight = style.height;
+          span.style.font = style.font;
+          span.style.color = style.color;
+          span.style.background = style.backgroundColor;
+          span.style.borderTop = style.borderTop;
+          span.style.borderRight = style.borderRight;
+          span.style.borderBottom = style.borderBottom;
+          span.style.borderLeft = style.borderLeft;
+          span.style.borderRadius = style.borderRadius;
+          span.style.padding = style.padding;
+          span.style.lineHeight = style.lineHeight;
+          span.style.letterSpacing = style.letterSpacing;
+          span.style.textAlign = style.textAlign;
+          span.style.whiteSpace = "pre-wrap";
+          span.style.verticalAlign = "middle";
+          span.style.boxSizing = "border-box";
+
+          if (input.classList.contains("tag-input")) {
+            span.style.textAlign = "center";
+          }
+
+          if (input.classList.contains("header-name-input")) {
+            span.style.width = "100%";
+          }
+
+          if (input.closest(".pair-name-display")) {
+            span.style.width = "100%";
+            span.style.textAlign = "center";
+          }
+
+          input.style.display = "none";
+          input.parentNode.insertBefore(span, input.nextSibling);
+
+          replaced.push({ input, span });
+        });
+
+        return replaced;
+      }
+
+      function restoreInputsAfterExport(replaced) {
+        replaced.forEach(({ input, span }) => {
+          span.remove();
+          input.style.display = "";
+        });
+      }
+
+      async function exportPNG() {
+        const ov = document.getElementById("exportOverlay");
+        ov.classList.add("show");
+
+        await document.fonts.ready;
+
+        document.getElementById("colorPickRow").style.display = "none";
+        document.getElementById("txtStyleBar").style.display = "none";
+
+        if (selectedBox) selectedBox.classList.remove("selected");
+
+        document
+          .querySelectorAll(".float-txt-del")
+          .forEach((b) => (b.style.opacity = "0"));
+        document
+          .querySelectorAll(".float-txt-resize")
+          .forEach((b) => (b.style.opacity = "0"));
+        document
+          .querySelectorAll("input[type=file]")
+          .forEach((i) => (i.style.display = "none"));
+
+        const replaced = replaceInputsForExport();
+
+        await new Promise((r) => setTimeout(r, 150));
+
+        try {
+          const c = await html2canvas(document.getElementById("sheet"), {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: "#d4d0d8",
+            logging: false,
+          });
+
+          const a = document.createElement("a");
+          a.download = "pair_sheet.png";
+          a.href = c.toDataURL("image/png");
+          a.click();
+        } catch (e) {
+          alert("書き出しに失敗しました: " + e.message);
+        }
+
+        restoreInputsAfterExport(replaced);
+
+        document.getElementById("colorPickRow").style.display = "flex";
+        document
+          .querySelectorAll(".float-txt-del")
+          .forEach((b) => (b.style.opacity = ""));
+        document
+          .querySelectorAll(".float-txt-resize")
+          .forEach((b) => (b.style.opacity = ""));
+        document
+          .querySelectorAll("input[type=file]")
+          .forEach((i) => (i.style.display = ""));
+        ov.classList.remove("show");
+      }
+      /* ===== FLOATING TEXTBOXES ===== */
+      let selectedBox = null;
+
+      function addTextBox() {
+        const layer = document.getElementById("floatLayer");
+        layer.style.pointerEvents = "auto";
+        const box = document.createElement("div");
+        box.className = "float-txt";
+        box.style.left = "40px";
+        box.style.top =
+          40 + layer.querySelectorAll(".float-txt").length * 40 + "px";
+        box.style.width = "160px";
+        box.style.height = "60px";
+        box.innerHTML = `
+    <textarea placeholder="テキストを入力…"></textarea>
+    <button class="float-txt-del" onclick="deleteBox(this.parentElement)">✕</button>
+    <svg class="float-txt-resize" viewBox="0 0 10 10"><path d="M2 10 L10 2 M6 10 L10 6" stroke="white" stroke-width="1.5"/></svg>
+  `;
+        makeDraggable(box);
+        makeResizable(box);
+        box.addEventListener("mousedown", (e) => {
+          if (e.target.tagName !== "BUTTON") selectBox(box);
+        });
+        layer.appendChild(box);
+        selectBox(box);
+        box.querySelector("textarea").focus();
+      }
+
+      function deleteBox(box) {
+        if (selectedBox === box) {
+          selectedBox = null;
+          document.getElementById("txtStyleBar").style.display = "none";
+        }
+        box.remove();
+        const layer = document.getElementById("floatLayer");
+        if (!layer.querySelector(".float-txt"))
+          layer.style.pointerEvents = "none";
+      }
+
+      function selectBox(box) {
+        if (selectedBox) selectedBox.classList.remove("selected");
+        selectedBox = box;
+        box.classList.add("selected");
+        const bar = document.getElementById("txtStyleBar");
+        bar.style.display = "flex";
+        // sync controls to current box style
+        const ta = box.querySelector("textarea");
+        document.getElementById("txtColor").value = rgbToHex(
+          ta.style.color || "#ffffff"
+        );
+        const sz = parseInt(ta.style.fontSize) || 13;
+        document.getElementById("txtSize").value = sz;
+        document.getElementById("txtSizeVal").textContent = sz;
+        document.getElementById("txtAlign").value =
+          ta.style.textAlign || "left";
+        document.getElementById("txtWeight").value =
+          ta.style.fontWeight || "400";
+      }
+
+      function applyTxtStyle() {
+        if (!selectedBox) return;
+        const ta = selectedBox.querySelector("textarea");
+        const color = document.getElementById("txtColor").value;
+        const size = document.getElementById("txtSize").value;
+        const align = document.getElementById("txtAlign").value;
+        const weight = document.getElementById("txtWeight").value;
+        ta.style.color = color;
+        ta.style.fontSize = size + "px";
+        ta.style.textAlign = align;
+        ta.style.fontWeight = weight;
+        document.getElementById("txtSizeVal").textContent = size;
+      }
+
+      function rgbToHex(str) {
+        if (str.startsWith("#")) return str;
+        const m = str.match(/\d+/g);
+        if (!m) return "#ffffff";
+        return (
+          "#" +
+          m
+            .slice(0, 3)
+            .map((x) => parseInt(x).toString(16).padStart(2, "0"))
+            .join("")
+        );
+      }
+
+      function makeDraggable(el) {
+        let ox,
+          oy,
+          sx,
+          sy,
+          dragging = false;
+        el.addEventListener("mousedown", (e) => {
+          if (
+            e.target.tagName === "TEXTAREA" ||
+            e.target.tagName === "BUTTON" ||
+            e.target.tagName === "path" ||
+            e.target.tagName === "svg"
+          )
+            return;
+          e.preventDefault();
+          dragging = true;
+          sx = el.offsetLeft;
+          sy = el.offsetTop;
+          ox = e.clientX;
+          oy = e.clientY;
+        });
+        document.addEventListener("mousemove", (e) => {
+          if (!dragging) return;
+          el.style.left = sx + e.clientX - ox + "px";
+          el.style.top = sy + e.clientY - oy + "px";
+        });
+        document.addEventListener("mouseup", () => {
+          dragging = false;
+        });
+      }
+
+      function makeResizable(el) {
+        const handle = el.querySelector(".float-txt-resize");
+        let resizing = false,
+          sx,
+          sy,
+          sw,
+          sh;
+        handle.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          resizing = true;
+          sx = e.clientX;
+          sy = e.clientY;
+          sw = el.offsetWidth;
+          sh = el.offsetHeight;
+        });
+        document.addEventListener("mousemove", (e) => {
+          if (!resizing) return;
+          el.style.width = Math.max(60, sw + e.clientX - sx) + "px";
+          el.style.height = Math.max(28, sh + e.clientY - sy) + "px";
+        });
+        document.addEventListener("mouseup", () => {
+          resizing = false;
+        });
+      }
+
+      document.addEventListener("mousedown", (e) => {
+        if (
+          selectedBox &&
+          !selectedBox.contains(e.target) &&
+          !document.getElementById("txtStyleBar").contains(e.target)
+        ) {
+          selectedBox.classList.remove("selected");
+          selectedBox = null;
+          document.getElementById("txtStyleBar").style.display = "none";
+        }
+      });
+
+      function setPortraitColor(boxId, color) {
+        document.getElementById(boxId).style.background = color;
+      }
+
+      function syncName(n, val) {
+        const header = document.getElementById("headerName" + n);
+        const charField = document.getElementById("charName" + n);
+        if (document.activeElement === header) charField.value = val;
+        else header.value = val;
+      }
+
+      buildStats("stats1");
+      buildStats("stats2");
+      buildTraits("traits1a", 3);
+      buildTraits("traits1b", 3);
+      buildTraits("traits2a", 3);
+      buildTraits("traits2b", 3);
+    </script>
+  </body>
+</html>
