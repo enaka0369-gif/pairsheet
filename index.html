@@ -505,7 +505,35 @@
         cursor: pointer;
         padding: 0;
       }
+#textToolGroup input[type=color] {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
+  cursor: pointer;
+  padding: 0;
+}
 
+#textToolGroup input[type=range] {
+  width: 70px;
+  accent-color: #c084fc;
+}
+
+#textToolGroup select {
+  background: #222;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-size: 10px;
+  padding: 2px 4px;
+}
+
+#textToolGroup span {
+  font-size: 11px;
+  color: #ddd;
+  min-width: 20px;
+  text-align: center;
+}
       /* ===== FLOATING TEXTBOXES ===== */
       .float-txt {
         position: absolute;
@@ -1361,9 +1389,6 @@ function loadPortrait(inp, imgId, boxId) {
   selectedBox = box;
   box.classList.add('selected');
 
-  const bar = document.getElementById('txtStyleBar');
-  bar.style.display = 'flex';
-
   const ta = box.querySelector('textarea');
   document.getElementById('txtColor').value = rgbToHex(ta.style.color || '#ffffff');
 
@@ -1373,9 +1398,8 @@ function loadPortrait(inp, imgId, boxId) {
 
   document.getElementById('txtAlign').value = ta.style.textAlign || 'left';
   document.getElementById('txtWeight').value = ta.style.fontWeight || '400';
-
-  const mode = ta.style.writingMode === 'vertical-rl' ? 'vertical' : 'horizontal';
-  document.getElementById('txtMode').value = mode;
+  document.getElementById('txtMode').value =
+    ta.style.writingMode === 'vertical-rl' ? 'vertical' : 'horizontal';
 }
 
       function applyTxtStyle() {
