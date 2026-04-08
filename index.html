@@ -1461,9 +1461,10 @@ function loadPortrait(inp, imgId, boxId) {
         }
       });
 
-      function setPortraitColor(boxId, color) {
-        document.getElementById(boxId).style.background = color;
-      }
+function setPortraitColor(boxId, color) {
+  const box = document.getElementById(boxId);
+  box.style.backgroundColor = color;
+}
 
       function syncName(n, val) {
         const header = document.getElementById("headerName" + n);
