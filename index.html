@@ -1074,16 +1074,15 @@ txtStyleBar.addEventListener('mousedown', (e) => {
   e.stopPropagation();
 });
 
-document.addEventListener('mousedown', (e) => {
-  const bar = document.getElementById('txtStyleBar');
+document.addEventListener('mousedown', e => {
+  const control = document.querySelector('.control-panel');
 
   if (!selectedBox) return;
   if (selectedBox.contains(e.target)) return;
-  if (bar.contains(e.target)) return;
+  if (control.contains(e.target)) return;
 
   selectedBox.classList.remove('selected');
   selectedBox = null;
-  bar.style.display = 'none';
 });
       
       const STATS = [
