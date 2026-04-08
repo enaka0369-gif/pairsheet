@@ -664,7 +664,28 @@
         ✏️ テキスト追加
       </button>
       <span class="sep">|</span>
+<div class="toolbar-group" id="textToolGroup">
+  <label>文字</label>
+  <input type="color" id="txtColor" value="#ffffff" oninput="applyTxtStyle()">
+  <input type="range" id="txtSize" min="8" max="48" value="13" oninput="applyTxtStyle()">
+  <span id="txtSizeVal">13</span>
 
+  <select id="txtAlign" onchange="applyTxtStyle()">
+    <option value="left">左</option>
+    <option value="center">中央</option>
+    <option value="right">右</option>
+  </select>
+
+  <select id="txtWeight" onchange="applyTxtStyle()">
+    <option value="400">標準</option>
+    <option value="700">太字</option>
+  </select>
+
+  <select id="txtMode" onchange="applyTxtStyle()">
+    <option value="horizontal">横書き</option>
+    <option value="vertical">縦書き</option>
+  </select>
+</div>
       <div class="toolbar-group" id="statGroup">
         <label>ステータス色</label>
         <div
@@ -873,39 +894,6 @@
           <div class="center-panel" id="centerPanel">
             <div class="center-label" id="centerLabel">
               クリックして<br />画像を追加
-            </div>
-            <!-- floating textbox style bar (shown when a box is selected) -->
-            <div class="txt-style-bar" id="txtStyleBar" style="display: none">
-              <label>色</label>
-              <input
-                type="color"
-                id="txtColor"
-                value="#ffffff"
-                oninput="applyTxtStyle()"
-              />
-              <label>サイズ</label>
-              <input
-                type="range"
-                id="txtSize"
-                min="8"
-                max="48"
-                value="13"
-                oninput="applyTxtStyle()"
-              />
-              <label id="txtSizeVal">13</label>
-              <select id="txtAlign" onchange="applyTxtStyle()">
-                <option value="left">左</option>
-                <option value="center">中央</option>
-                <option value="right">右</option>
-              </select>
-              <select id="txtWeight" onchange="applyTxtStyle()">
-                <option value="400">標準</option>
-                <option value="700">太字</option>
-              </select>
-              <select id="txtMode" onchange="applyTxtStyle()">
-              <option value="horizontal">横書き</option>
-             <option value="vertical">縦書き</option>
-              </select>
             </div>
             <!-- textbox container -->
             <div
